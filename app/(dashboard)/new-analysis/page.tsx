@@ -1,14 +1,231 @@
+'use client';
+
+import { useState } from 'react';
+
+interface ContractAnalysis {
+    summary: string;
+    keyObligations: string[];
+    risksAndRedFlags: string[];
+    importantDates: string[];
+    whoShouldBeCareful: string;
+}
+
 export default function NewAnalysisPage() {
+    const [text, setText] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const [analysis, setAnalysis] = useState<ContractAnalysis | null>(null);
+
+    const handleAnalyze = async () => {
+        setLoading(true);
+        setError(null);
+        setAnalysis(null);
+
+        const formData = new FormData();
+        formData.append('text', text);
+
+        try {
+            const response = await fetch('/api/analyze', {
+                method: 'POST',
+                body: formData,
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                setError(data.error || 'An error occurred');
+            } else {
+                setAnalysis(data.analysis);
+            }
+        } catch {
+            setError('Failed to connect to the server. Please try again.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleCopyResults = () => {
+        if (!analysis) return;
+        const resultText = `
+Summary: ${analysis.summary}
+
+Key Obligations:
+${analysis.keyObligations.map(o => `• ${o}`).join('\n')}
+
+Risks & Red Flags:
+${analysis.risksAndRedFlags.map(r => `• ${r}`).join('\n')}
+
+Important Dates:
+${analysis.importantDates.map(d => `• ${d}`).join('\n')}
+
+Who Should Be Careful:
+${analysis.whoShouldBeCareful}
+    `.trim();
+        navigator.clipboard.writeText(resultText);
+    };
+
+    const handleReanalyze = () => {
+        setAnalysis(null);
+        setError(null);
+    };
+
+    const canAnalyze = text.trim().length >= 50;
+
     return (
         <div className="max-w-4xl mx-auto">
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
-                New Analysis
-            </h1>
-            <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg p-8 text-center">
+            <div className="mb-8">
+                <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                    New Analysis
+                </h1>
                 <p className="text-gray-600 dark:text-gray-400">
-                    Contract upload and analysis features coming soon
+                    Paste your contract text to get an AI-powered analysis
                 </p>
             </div>
+
+            {!analysis ? (
+                <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg p-6">
+                    {/* Text Input */}
+                    <div className="mb-6">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Contract Text
+                        </label>
+                        <textarea
+                            value={text}
+                            onChange={(e) => setText(e.target.value)}
+                            placeholder="Paste your contract text here..."
+                            rows={14}
+                            className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none font-mono text-sm"
+                        />
+                        <div className="mt-2 flex justify-between text-sm text-gray-500 dark:text-gray-500">
+                            <span>{text.length.toLocaleString()} characters</span>
+                            {text.length < 50 && <span className="text-amber-600 dark:text-amber-400">Minimum 50 characters required</span>}
+                        </div>
+                    </div>
+
+                    {/* Error Message */}
+                    {error && (
+                        <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-red-700 dark:text-red-400">
+                            {error}
+                        </div>
+                    )}
+
+                    {/* Analyze Button */}
+                    <button
+                        onClick={handleAnalyze}
+                        disabled={!canAnalyze || loading}
+                        className="w-full py-3 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        {loading ? (
+                            <span className="flex items-center justify-center gap-2">
+                                <span className="animate-spin">⏳</span> Analyzing...
+                            </span>
+                        ) : (
+                            'Analyze Contract'
+                        )}
+                    </button>
+                </div>
+            ) : (
+                /* Results Display */
+                <div className="space-y-6">
+                    <div className="flex justify-between items-center">
+                        <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+                            Analysis Results
+                        </h2>
+                        <div className="flex gap-2">
+                            <button
+                                onClick={handleCopyResults}
+                                className="px-4 py-2 text-sm font-medium bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                            >
+                                📋 Copy
+                            </button>
+                            <button
+                                onClick={handleReanalyze}
+                                className="px-4 py-2 text-sm font-medium bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 rounded-lg hover:bg-indigo-200 dark:hover:bg-indigo-900/50 transition-colors"
+                            >
+                                🔄 New Analysis
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Summary Card */}
+                    <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg p-6">
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+                            📝 Plain English Summary
+                        </h3>
+                        <p className="text-gray-700 dark:text-gray-300 leading-relaxed">{analysis.summary}</p>
+                    </div>
+
+                    {/* Key Obligations */}
+                    <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg p-6">
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+                            📋 Key Obligations
+                        </h3>
+                        {analysis.keyObligations.length > 0 ? (
+                            <ul className="space-y-3">
+                                {analysis.keyObligations.map((item, i) => (
+                                    <li key={i} className="flex items-start gap-3 text-gray-700 dark:text-gray-300">
+                                        <span className="text-indigo-600 dark:text-indigo-400 font-bold">•</span>
+                                        <span>{item}</span>
+                                    </li>
+                                ))}
+                            </ul>
+                        ) : (
+                            <p className="text-gray-500 dark:text-gray-500 italic">No specific obligations identified</p>
+                        )}
+                    </div>
+
+                    {/* Risks & Red Flags */}
+                    <div className="bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-800/50 rounded-lg p-6">
+                        <h3 className="text-lg font-semibold text-red-700 dark:text-red-400 mb-3 flex items-center gap-2">
+                            🚩 Risks & Red Flags
+                        </h3>
+                        {analysis.risksAndRedFlags.length > 0 ? (
+                            <ul className="space-y-3">
+                                {analysis.risksAndRedFlags.map((item, i) => (
+                                    <li key={i} className="flex items-start gap-3 text-gray-700 dark:text-gray-300">
+                                        <span className="text-red-600 dark:text-red-400">⚠️</span>
+                                        <span>{item}</span>
+                                    </li>
+                                ))}
+                            </ul>
+                        ) : (
+                            <p className="text-green-600 dark:text-green-400">✓ No significant risks identified</p>
+                        )}
+                    </div>
+
+                    {/* Important Dates */}
+                    <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg p-6">
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+                            📅 Important Dates & Deadlines
+                        </h3>
+                        {analysis.importantDates.length > 0 ? (
+                            <ul className="space-y-3">
+                                {analysis.importantDates.map((item, i) => (
+                                    <li key={i} className="flex items-start gap-3 text-gray-700 dark:text-gray-300">
+                                        <span className="text-amber-600 dark:text-amber-400">📌</span>
+                                        <span>{item}</span>
+                                    </li>
+                                ))}
+                            </ul>
+                        ) : (
+                            <p className="text-gray-500 dark:text-gray-500 italic">No specific dates or deadlines found</p>
+                        )}
+                    </div>
+
+                    {/* Who Should Be Careful */}
+                    <div className="bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-800/50 rounded-lg p-6">
+                        <h3 className="text-lg font-semibold text-amber-800 dark:text-amber-300 mb-3 flex items-center gap-2">
+                            ⚠️ Who Should Be Careful
+                        </h3>
+                        <p className="text-gray-700 dark:text-gray-300">{analysis.whoShouldBeCareful}</p>
+                    </div>
+
+                    {/* Disclaimer */}
+                    <div className="text-center text-sm text-gray-500 dark:text-gray-500 py-4 border-t border-gray-200 dark:border-gray-800">
+                        ⚖️ This analysis is for informational purposes only and does not constitute legal advice.
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
