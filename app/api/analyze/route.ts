@@ -50,8 +50,30 @@ export async function POST(request: NextRequest) {
 
                 // Use require for pdf-parse (CommonJS module)
                 // eslint-disable-next-line @typescript-eslint/no-require-imports
-                const pdfParseModule = require('pdf-parse');
-                const pdfParse = pdfParseModule.default || pdfParseModule;
+                // Use require for pdf-parse (CommonJS module)
+                // eslint-disable-next-line @typescript-eslint/no-require-imports
+                let pdfParse;
+                try {
+                    // Try specific CJS build first
+                    pdfParse = require('pdf-parse/dist/node/cjs/index.cjs');
+                } catch (e) {
+                    try {
+                        // Fallback to standard
+                        // eslint-disable-next-line @typescript-eslint/no-require-imports
+                        pdfParse = require('pdf-parse');
+                    } catch (e2) {
+                        console.error('pdf-parse require failed', e2);
+                    }
+                }
+
+                // Handle default export if present
+                if (pdfParse && typeof pdfParse !== 'function' && pdfParse.default) {
+                    pdfParse = pdfParse.default;
+                }
+
+                if (typeof pdfParse !== 'function') {
+                    throw new Error(`pdf-parse import failed. Type: ${typeof pdfParse}`);
+                }
 
                 const data = await pdfParse(buffer);
                 contractText = data.text || '';
