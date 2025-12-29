@@ -94,8 +94,9 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ analysis });
     } catch (error) {
         console.error('Analysis error:', error);
+        const errorMessage = error instanceof Error ? error.message : 'An error occurred during analysis. Please try again.';
         return NextResponse.json(
-            { error: 'An error occurred during analysis. Please try again.' },
+            { error: errorMessage },
             { status: 500 }
         );
     }
