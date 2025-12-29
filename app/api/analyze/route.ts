@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { analyzeContract } from '@/lib/gemini/analyze';
+import { createClient } from '@/lib/supabase/server';
 
 // Force Node.js runtime for PDF processing
 export const runtime = 'nodejs';
@@ -7,6 +8,15 @@ export const dynamic = 'force-dynamic';
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB limit
 const MAX_TEXT_LENGTH = 100000; // 100k characters limit
+
+// Polyfill DOMMatrix for pdf-parse in Node.js
+if (typeof global.DOMMatrix === 'undefined') {
+    // @ts-expect-error - Polyfilling DOMMatrix for pdf-parse
+    global.DOMMatrix = class DOMMatrix {
+        a = 1; b = 0; c = 0; d = 1; e = 0; f = 0;
+        constructor() { }
+    };
+}
 
 export async function POST(request: NextRequest) {
     try {
@@ -40,7 +50,8 @@ export async function POST(request: NextRequest) {
 
                 // Use require for pdf-parse (CommonJS module)
                 // eslint-disable-next-line @typescript-eslint/no-require-imports
-                const pdfParse = require('pdf-parse');
+                const pdfParseModule = require('pdf-parse');
+                const pdfParse = pdfParseModule.default || pdfParseModule;
 
                 const data = await pdfParse(buffer);
                 contractText = data.text || '';
@@ -92,6 +103,31 @@ export async function POST(request: NextRequest) {
 
         // Analyze with Gemini
         const analysis = await analyzeContract(contractText);
+
+        // Save to Supabase if user is authenticated
+        const supabase = await createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+
+        if (user) {
+            try {
+                const { error: dbError } = await supabase
+                    .from('analyses')
+                    .insert({
+                        user_id: user.id,
+                        contract_title: pdfFile ? pdfFile.name : 'Text Analysis',
+                        summary: analysis.summary,
+                        full_analysis: analysis,
+                        original_text: contractText
+                    });
+
+                if (dbError) {
+                    console.error('Database save error:', dbError);
+                    // We don't fail the request if saving fails, just log it
+                }
+            } catch (err) {
+                console.error('Error saving to history:', err);
+            }
+        }
 
         return NextResponse.json({ analysis });
     } catch (error) {
