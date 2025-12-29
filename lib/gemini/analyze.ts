@@ -1,3 +1,5 @@
+import OpenAI from 'openai';
+import Groq from 'groq-sdk';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
 const GOLDEN_PROMPT = `You are a contract analysis expert. Analyze the following contract text and provide a structured analysis.
@@ -17,6 +19,7 @@ Guidelines:
 - Highlight anything that seems unusual or one-sided
 - If there are no items for a category, use an empty array []
 - Keep each point concise but informative
+- Return ONLY the JSON object, no other text
 
 CONTRACT TEXT:
 `;
@@ -29,46 +32,137 @@ export interface ContractAnalysis {
     whoShouldBeCareful: string;
 }
 
-export async function analyzeContract(contractText: string): Promise<ContractAnalysis> {
-    // Get API key at runtime to ensure environment is loaded
-    const apiKey = process.env.GEMINI_API_KEY;
+type Provider = 'openrouter' | 'groq' | 'gemini';
 
-    if (!apiKey) {
-        throw new Error('GEMINI_API_KEY is not configured. Please add it to your .env.local file.');
+function isRateLimitError(error: unknown): boolean {
+    if (error instanceof Error) {
+        const message = error.message.toLowerCase();
+        return message.includes('rate') ||
+            message.includes('quota') ||
+            message.includes('429') ||
+            message.includes('too many requests') ||
+            message.includes('limit');
     }
+    return false;
+}
 
-    const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
-
-    const prompt = GOLDEN_PROMPT + contractText;
+function parseAnalysisResponse(text: string): ContractAnalysis {
+    // Extract JSON from the response (handle markdown code blocks)
+    let jsonText = text;
+    const jsonMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/);
+    if (jsonMatch) {
+        jsonText = jsonMatch[1].trim();
+    }
 
     try {
-        const result = await model.generateContent(prompt);
-        const response = await result.response;
-        const text = response.text();
-
-        // Extract JSON from the response (handle markdown code blocks)
-        let jsonText = text;
-        const jsonMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/);
-        if (jsonMatch) {
-            jsonText = jsonMatch[1].trim();
-        }
-
-        try {
-            const analysis = JSON.parse(jsonText) as ContractAnalysis;
-            return analysis;
-        } catch {
-            // If parsing fails, create a structured response from the raw text
-            return {
-                summary: text.substring(0, 500),
-                keyObligations: ['Unable to parse structured response - please try again'],
-                risksAndRedFlags: [],
-                importantDates: [],
-                whoShouldBeCareful: 'Please re-analyze for detailed results',
-            };
-        }
-    } catch (error) {
-        console.error('Gemini API error:', error);
-        throw new Error('Failed to analyze contract with AI. Please check your API key and try again.');
+        return JSON.parse(jsonText) as ContractAnalysis;
+    } catch {
+        // If parsing fails, return a fallback response
+        return {
+            summary: text.substring(0, 500),
+            keyObligations: ['Unable to parse structured response - please try again'],
+            risksAndRedFlags: [],
+            importantDates: [],
+            whoShouldBeCareful: 'Please re-analyze for detailed results',
+        };
     }
+}
+
+async function analyzeWithOpenRouter(contractText: string): Promise<ContractAnalysis> {
+    const apiKey = process.env.OPENROUTER_API_KEY;
+    if (!apiKey) {
+        throw new Error('OPENROUTER_API_KEY not configured');
+    }
+
+    console.log('Trying OpenRouter...');
+
+    const openai = new OpenAI({
+        baseURL: 'https://openrouter.ai/api/v1',
+        apiKey,
+    });
+
+    const completion = await openai.chat.completions.create({
+        model: 'meta-llama/llama-3.1-8b-instruct:free',
+        messages: [
+            { role: 'user', content: GOLDEN_PROMPT + contractText }
+        ],
+    });
+
+    const text = completion.choices[0]?.message?.content || '';
+    console.log('OpenRouter response received');
+    return parseAnalysisResponse(text);
+}
+
+async function analyzeWithGroq(contractText: string): Promise<ContractAnalysis> {
+    const apiKey = process.env.GROQ_API_KEY;
+    if (!apiKey) {
+        throw new Error('GROQ_API_KEY not configured');
+    }
+
+    console.log('Trying Groq...');
+
+    const groq = new Groq({ apiKey });
+
+    const completion = await groq.chat.completions.create({
+        model: 'llama-3.1-8b-instant',
+        messages: [
+            { role: 'user', content: GOLDEN_PROMPT + contractText }
+        ],
+    });
+
+    const text = completion.choices[0]?.message?.content || '';
+    console.log('Groq response received');
+    return parseAnalysisResponse(text);
+}
+
+async function analyzeWithGemini(contractText: string): Promise<ContractAnalysis> {
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) {
+        throw new Error('GEMINI_API_KEY not configured');
+    }
+
+    console.log('Trying Gemini...');
+
+    const genAI = new GoogleGenerativeAI(apiKey);
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' });
+
+    const result = await model.generateContent(GOLDEN_PROMPT + contractText);
+    const response = await result.response;
+    const text = response.text();
+
+    console.log('Gemini response received');
+    return parseAnalysisResponse(text);
+}
+
+export async function analyzeContract(contractText: string): Promise<ContractAnalysis> {
+    const providers: { name: Provider; fn: (text: string) => Promise<ContractAnalysis> }[] = [
+        { name: 'openrouter', fn: analyzeWithOpenRouter },
+        { name: 'groq', fn: analyzeWithGroq },
+        { name: 'gemini', fn: analyzeWithGemini },
+    ];
+
+    let lastError: Error | null = null;
+
+    for (const provider of providers) {
+        try {
+            const result = await provider.fn(contractText);
+            console.log(`✓ Analysis completed with ${provider.name}`);
+            return result;
+        } catch (error) {
+            console.error(`✗ ${provider.name} failed:`, error instanceof Error ? error.message : error);
+            lastError = error instanceof Error ? error : new Error(String(error));
+
+            // If it's a rate limit error, try next provider
+            if (isRateLimitError(error)) {
+                console.log(`Rate limit hit on ${provider.name}, trying next provider...`);
+                continue;
+            }
+
+            // For non-rate-limit errors (like missing API key), also try next provider
+            continue;
+        }
+    }
+
+    // All providers failed
+    throw new Error(`All AI providers failed. Last error: ${lastError?.message || 'Unknown error'}`);
 }

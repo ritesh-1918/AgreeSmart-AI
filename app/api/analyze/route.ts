@@ -38,11 +38,12 @@ export async function POST(request: NextRequest) {
                 const arrayBuffer = await pdfFile.arrayBuffer();
                 const buffer = Buffer.from(arrayBuffer);
 
-                // Use require for Node.js compatibility
+                // Use require for pdf-parse (CommonJS module)
                 // eslint-disable-next-line @typescript-eslint/no-require-imports
                 const pdfParse = require('pdf-parse');
+
                 const data = await pdfParse(buffer);
-                contractText = data.text;
+                contractText = data.text || '';
 
                 // Clean up whitespace
                 contractText = contractText.replace(/\s+/g, ' ').trim();
@@ -57,9 +58,10 @@ export async function POST(request: NextRequest) {
                 }
             } catch (err) {
                 console.error('PDF extraction error:', err);
+                const errorMsg = err instanceof Error ? err.message : 'Unknown error';
                 return NextResponse.json(
                     {
-                        error: 'Failed to extract text from PDF. Please ensure it is a text-based PDF or paste text instead.',
+                        error: `Failed to extract text from PDF: ${errorMsg}. Please paste text instead.`,
                     },
                     { status: 400 }
                 );
