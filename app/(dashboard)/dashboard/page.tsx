@@ -1,15 +1,21 @@
+'use client';
+
+import { createClient } from '@/lib/supabase/client';
+import { useEffect, useState } from 'react';
+import Link from 'next/link';
+
 export default function DashboardPage() {
-    const stats = [
+    const [stats, setStats] = useState([
         {
             title: 'Total Analyses',
-            value: '0',
-            description: 'No contracts analyzed yet',
+            value: '-',
+            description: 'Loading...',
             icon: '📊',
         },
         {
             title: 'Recent Activity',
-            value: 'No activity yet',
-            description: 'Start by analyzing your first contract',
+            value: '-',
+            description: 'Loading...',
             icon: '🕐',
         },
         {
@@ -18,7 +24,53 @@ export default function DashboardPage() {
             description: 'System is operational',
             icon: '✅',
         },
-    ];
+    ]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchStats = async () => {
+            const supabase = createClient();
+
+            // Get Total Count
+            const { count, error } = await supabase
+                .from('analyses')
+                .select('*', { count: 'exact', head: true });
+
+            // Get Last Activity
+            const { data: recent } = await supabase
+                .from('analyses')
+                .select('created_at')
+                .order('created_at', { ascending: false })
+                .limit(1)
+                .single();
+
+            if (!error) {
+                setStats([
+                    {
+                        title: 'Total Analyses',
+                        value: count?.toString() || '0',
+                        description: count === 0 ? 'No contracts analyzed yet' : 'Total contracts processed',
+                        icon: '📊',
+                    },
+                    {
+                        title: 'Recent Activity',
+                        value: recent ? new Date(recent.created_at).toLocaleDateString() : 'None',
+                        description: recent ? 'Last aalysis performed' : 'Start your first analysis',
+                        icon: '🕐',
+                    },
+                    {
+                        title: 'Status',
+                        value: 'Ready',
+                        description: 'System is operational',
+                        icon: '✅',
+                    },
+                ]);
+            }
+            setLoading(false);
+        };
+
+        fetchStats();
+    }, []);
 
     return (
         <div className="max-w-7xl mx-auto">
@@ -32,10 +84,10 @@ export default function DashboardPage() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {stats.map((stat) => (
+                {stats.map((stat, i) => (
                     <div
                         key={stat.title}
-                        className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg p-6 hover:shadow-lg dark:hover:shadow-gray-900/50 transition-shadow"
+                        className={`bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg p-6 hover:shadow-lg dark:hover:shadow-gray-900/50 transition-shadow ${loading && i < 2 ? 'animate-pulse' : ''}`}
                     >
                         <div className="flex items-start justify-between mb-4">
                             <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-indigo-50 dark:bg-indigo-900/30">
