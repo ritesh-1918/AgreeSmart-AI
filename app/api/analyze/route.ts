@@ -52,26 +52,19 @@ export async function POST(request: NextRequest) {
                 // eslint-disable-next-line @typescript-eslint/no-require-imports
                 // Use require for pdf-parse (CommonJS module)
                 // eslint-disable-next-line @typescript-eslint/no-require-imports
-                let pdfParse;
-                try {
-                    // Try specific CJS build first
-                    pdfParse = require('pdf-parse/dist/node/cjs/index.cjs');
-                } catch (e) {
-                    try {
-                        // Fallback to standard
-                        // eslint-disable-next-line @typescript-eslint/no-require-imports
-                        pdfParse = require('pdf-parse');
-                    } catch (e2) {
-                        console.error('pdf-parse require failed', e2);
-                    }
+                let pdfParseLib = require('pdf-parse');
+
+                // Handle various export patterns (default, or direct function)
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                let pdfParse: any = pdfParseLib;
+
+                if (typeof pdfParse !== 'function' && pdfParseLib.default) {
+                    pdfParse = pdfParseLib.default;
                 }
 
-                // Handle default export if present
-                if (pdfParse && typeof pdfParse !== 'function' && pdfParse.default) {
-                    pdfParse = pdfParse.default;
-                }
-
+                // If still not a function, try to find the function in the object
                 if (typeof pdfParse !== 'function') {
+                    console.error('pdf-parse import diagnosis:', typeof pdfParseLib, Object.keys(pdfParseLib || {}));
                     throw new Error(`pdf-parse import failed. Type: ${typeof pdfParse}`);
                 }
 

@@ -1,225 +1,208 @@
 import Link from 'next/link';
+import { Header } from '@/app/components/Header';
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-950">
+    <div className="min-h-screen bg-white text-gray-900 selection:bg-indigo-100 selection:text-indigo-900">
+
+      {/* Decorative Background Blobs */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none -z-10">
+        <div className="absolute -top-[20%] -left-[10%] w-[50%] h-[50%] rounded-full bg-indigo-50/50 blur-3xl animate-pulse"></div>
+        <div className="absolute top-[10%] -right-[10%] w-[40%] h-[40%] rounded-full bg-blue-50/50 blur-3xl animate-pulse delay-1000"></div>
+        <div className="absolute -bottom-[20%] left-[20%] w-[60%] h-[60%] rounded-full bg-indigo-50/30 blur-3xl animate-pulse delay-700"></div>
+      </div>
+
       {/* Hero Section */}
-      <section className="relative py-20 px-6 lg:py-32">
-        <div className="max-w-4xl mx-auto text-center">
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white mb-6 leading-tight">
-            Understand contracts<br />before you sign.
+      <section className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 px-6">
+        <div className="max-w-6xl mx-auto text-center relative z-10">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/80 border border-gray-200 backdrop-blur-md shadow-sm mb-8 animate-fade-in-up">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-600"></span>
+            </span>
+            <span className="text-sm font-medium text-gray-600">AI-Powered Contract Analysis</span>
+          </div>
+
+          <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-gray-900 mb-8 leading-[1.1] max-w-4xl mx-auto">
+            Make Contracts <br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-blue-600">
+              Simple & Safe
+            </span>
           </h1>
-          <p className="text-xl text-gray-600 dark:text-gray-400 mb-8 max-w-2xl mx-auto">
-            AI-powered contract analysis that translates complex legal language into plain English.
-            Know exactly what you're agreeing to.
+
+          <p className="text-xl text-gray-600 mb-12 max-w-2xl mx-auto leading-relaxed">
+            Stop signing blindly. Our AI breaks down complex legal jargon into
+            plain English, highlighting risks and obligations in seconds.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <Link
               href="/auth/signup"
-              className="inline-flex items-center justify-center px-8 py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg transition-colors"
+              className="group relative inline-flex h-14 items-center justify-center overflow-hidden rounded-xl bg-indigo-600 px-8 font-medium text-white transition-all duration-300 hover:bg-indigo-700 hover:ring-4 hover:ring-indigo-200 hover:scale-105 shadow-lg shadow-indigo-600/20"
             >
-              Get Started Free
+              <span className="mr-2">Analyze Contract Free</span>
+              <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+              </svg>
             </Link>
             <Link
               href="/dashboard"
-              className="inline-flex items-center justify-center px-8 py-4 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 font-semibold rounded-lg hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors"
+              className="inline-flex h-14 items-center justify-center rounded-xl border border-gray-200 bg-white/50 px-8 font-medium text-gray-700 backdrop-blur-sm transition-all hover:bg-white hover:border-gray-300 hover:shadow-md"
             >
-              View Dashboard
+              View Demo
             </Link>
           </div>
-        </div>
-      </section>
 
-      {/* Problem Section */}
-      <section className="py-20 px-6 bg-gray-50 dark:bg-gray-900">
-        <div className="max-w-4xl mx-auto">
-          <h2 className="text-3xl font-bold text-gray-900 dark:text-white text-center mb-12">
-            Contracts shouldn't be confusing
-          </h2>
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="text-center">
-              <div className="w-12 h-12 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl">📄</span>
-              </div>
-              <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Too Long</h3>
-              <p className="text-gray-600 dark:text-gray-400 text-sm">
-                Most contracts are 20+ pages of dense text that no one has time to read.
-              </p>
-            </div>
-            <div className="text-center">
-              <div className="w-12 h-12 bg-orange-100 dark:bg-orange-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl">⚖️</span>
-              </div>
-              <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Legal Jargon</h3>
-              <p className="text-gray-600 dark:text-gray-400 text-sm">
-                Complex terminology makes it hard to understand what you're actually agreeing to.
-              </p>
-            </div>
-            <div className="text-center">
-              <div className="w-12 h-12 bg-yellow-100 dark:bg-yellow-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl">⚠️</span>
-              </div>
-              <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Hidden Risks</h3>
-              <p className="text-gray-600 dark:text-gray-400 text-sm">
-                Important clauses and risky terms often go unnoticed until it's too late.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Solution Section */}
-      <section className="py-20 px-6">
-        <div className="max-w-4xl mx-auto">
-          <h2 className="text-3xl font-bold text-gray-900 dark:text-white text-center mb-4">
-            How AgreeSmart AI works
-          </h2>
-          <p className="text-gray-600 dark:text-gray-400 text-center mb-12">
-            Three simple steps to understand any contract
-          </p>
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="relative">
-              <div className="w-10 h-10 bg-indigo-600 text-white rounded-full flex items-center justify-center font-bold mb-4">
-                1
-              </div>
-              <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Upload</h3>
-              <p className="text-gray-600 dark:text-gray-400 text-sm">
-                Upload your contract PDF securely. We support all common document formats.
-              </p>
-            </div>
-            <div className="relative">
-              <div className="w-10 h-10 bg-indigo-600 text-white rounded-full flex items-center justify-center font-bold mb-4">
-                2
-              </div>
-              <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Analyze</h3>
-              <p className="text-gray-600 dark:text-gray-400 text-sm">
-                Our AI reads and analyzes every clause, identifying key terms and potential risks.
-              </p>
-            </div>
-            <div className="relative">
-              <div className="w-10 h-10 bg-indigo-600 text-white rounded-full flex items-center justify-center font-bold mb-4">
-                3
-              </div>
-              <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Understand</h3>
-              <p className="text-gray-600 dark:text-gray-400 text-sm">
-                Get a clear, plain-English summary with highlighted risks and key obligations.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Features Section */}
-      <section className="py-20 px-6 bg-gray-50 dark:bg-gray-900">
-        <div className="max-w-4xl mx-auto">
-          <h2 className="text-3xl font-bold text-gray-900 dark:text-white text-center mb-12">
-            Key Features
-          </h2>
-          <div className="grid md:grid-cols-2 gap-6">
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700">
-              <div className="w-10 h-10 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg flex items-center justify-center mb-4">
-                <span className="text-xl">📤</span>
-              </div>
-              <h3 className="font-semibold text-gray-900 dark:text-white mb-2">PDF Upload</h3>
-              <p className="text-gray-600 dark:text-gray-400 text-sm">
-                Simply drag and drop your contract PDF for instant analysis.
-              </p>
-            </div>
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700">
-              <div className="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center mb-4">
-                <span className="text-xl">📝</span>
-              </div>
-              <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Plain-English Summaries</h3>
-              <p className="text-gray-600 dark:text-gray-400 text-sm">
-                Complex legal terms translated into language anyone can understand.
-              </p>
-            </div>
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700">
-              <div className="w-10 h-10 bg-red-100 dark:bg-red-900/30 rounded-lg flex items-center justify-center mb-4">
-                <span className="text-xl">🚩</span>
-              </div>
-              <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Risk Detection</h3>
-              <p className="text-gray-600 dark:text-gray-400 text-sm">
-                Automatically identifies red flags, unusual clauses, and potential concerns.
-              </p>
-            </div>
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700">
-              <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center mb-4">
-                <span className="text-xl">🔒</span>
-              </div>
-              <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Secure Workspace</h3>
-              <p className="text-gray-600 dark:text-gray-400 text-sm">
-                Your documents are encrypted and kept private in your personal workspace.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Trust Section */}
-      <section className="py-20 px-6">
-        <div className="max-w-2xl mx-auto text-center">
-          <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-6">
-            Trust & Privacy
-          </h2>
-          <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-6 mb-6">
-            <p className="text-amber-800 dark:text-amber-200 text-sm">
-              <strong>Important:</strong> AgreeSmart AI is an analysis tool, not a legal service.
-              Our summaries are for informational purposes only and do not constitute legal advice.
-              Always consult a qualified attorney for legal decisions.
-            </p>
-          </div>
-          <div className="flex flex-col sm:flex-row gap-8 justify-center text-center">
-            <div>
-              <div className="w-12 h-12 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-2">
-                <span className="text-xl">🔐</span>
-              </div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">End-to-end encryption</p>
-            </div>
-            <div>
-              <div className="w-12 h-12 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-2">
-                <span className="text-xl">🗑️</span>
-              </div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">Delete anytime</p>
-            </div>
-            <div>
-              <div className="w-12 h-12 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-2">
-                <span className="text-xl">🚫</span>
-              </div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">Never shared or sold</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Footer */}
-      <footer className="py-12 px-6 border-t border-gray-200 dark:border-gray-800">
-        <div className="max-w-4xl mx-auto">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-6">
-            <div className="text-center md:text-left">
-              <div className="flex items-center gap-2 justify-center md:justify-start mb-2">
-                <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
-                  <span className="text-white font-bold text-sm">A</span>
+          {/* Hero Visual / Glass Card */}
+          <div className="mt-20 relative mx-auto max-w-5xl">
+            <div className="absolute -inset-1 rounded-2xl bg-gradient-to-r from-indigo-500 to-blue-500 opacity-20 blur-lg"></div>
+            <div className="relative rounded-2xl bg-white/40 border border-white/50 backdrop-blur-xl shadow-2xl p-4 md:p-8">
+              <div className="flex flex-col md:flex-row gap-8 items-start">
+                <div className="flex-1 w-full bg-white rounded-xl shadow-sm border border-gray-100 p-6 text-left">
+                  <div className="flex items-center gap-2 mb-4">
+                    <div className="h-8 w-8 rounded-full bg-red-100 flex items-center justify-center text-red-600">📄</div>
+                    <span className="font-semibold text-gray-700">Original Contract</span>
+                  </div>
+                  <div className="space-y-3">
+                    <div className="h-2 bg-gray-100 rounded w-full"></div>
+                    <div className="h-2 bg-gray-100 rounded w-5/6"></div>
+                    <div className="h-2 bg-gray-100 rounded w-4/6"></div>
+                    <div className="p-3 bg-red-50 rounded border-l-4 border-red-400 text-xs text-red-800 leading-relaxed font-mono">
+                      "SECTION 4.2: INDEMNIFICATION. The Vendor shall indemnify, defend and hold harmless..."
+                    </div>
+                    <div className="h-2 bg-gray-100 rounded w-full"></div>
+                  </div>
                 </div>
-                <span className="font-bold text-gray-900 dark:text-white">AgreeSmart AI</span>
+
+                <div className="hidden md:flex items-center justify-center pt-12 text-indigo-400">
+                  <svg className="w-8 h-8 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                  </svg>
+                </div>
+
+                <div className="flex-1 w-full bg-white/80 rounded-xl shadow-lg border border-indigo-100 p-6 text-left ring-1 ring-indigo-500/10">
+                  <div className="flex items-center gap-2 mb-4">
+                    <div className="h-8 w-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600">✨</div>
+                    <span className="font-semibold text-gray-900">AI Analysis</span>
+                  </div>
+                  <div className="space-y-4">
+                    <div>
+                      <span className="text-xs font-bold uppercase tracking-wider text-gray-400">Meaning</span>
+                      <p className="text-sm text-gray-700 mt-1">If something goes wrong, <strong>you have to pay for it</strong>.</p>
+                    </div>
+                    <div>
+                      <span className="text-xs font-bold uppercase tracking-wider text-red-500">⚠️ Risk</span>
+                      <p className="text-sm text-gray-700 mt-1">High financial risk. Negotiate to cap this liability.</p>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                AI-powered contract understanding
-              </p>
-            </div>
-            <div className="flex gap-6">
-              <Link href="/auth/login" className="text-sm text-gray-600 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400">
-                Login
-              </Link>
-              <Link href="/auth/signup" className="text-sm text-gray-600 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400">
-                Sign Up
-              </Link>
             </div>
           </div>
-          <div className="mt-8 pt-8 border-t border-gray-200 dark:border-gray-800 text-center">
-            <p className="text-xs text-gray-500 dark:text-gray-500">
-              © {new Date().getFullYear()} AgreeSmart AI. All rights reserved.
-            </p>
+        </div>
+      </section>
+
+      {/* Stats Section */}
+      <section className="py-12 border-y border-gray-100 bg-white/50 backdrop-blur-sm">
+        <div className="max-w-7xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+          <div>
+            <div className="text-3xl font-bold text-gray-900 mb-1">10k+</div>
+            <div className="text-sm text-gray-500 font-medium">Contracts Analyzed</div>
+          </div>
+          <div>
+            <div className="text-3xl font-bold text-gray-900 mb-1">2.5s</div>
+            <div className="text-sm text-gray-500 font-medium">Average Time</div>
+          </div>
+          <div>
+            <div className="text-3xl font-bold text-gray-900 mb-1">100%</div>
+            <div className="text-sm text-gray-500 font-medium">Secure & Private</div>
+          </div>
+          <div>
+            <div className="text-3xl font-bold text-gray-900 mb-1">Free</div>
+            <div className="text-sm text-gray-500 font-medium">To Get Started</div>
+          </div>
+        </div>
+      </section>
+
+      {/* Features Grid - Bento Style */}
+      <section className="py-24 px-6 relative">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">Everything you need to sign confidently</h2>
+            <p className="text-gray-600 max-w-2xl mx-auto">Don't let legal jargon intimidate you. Our suite of tools puts you back in control.</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Feature 1 - Large */}
+            <div className="md:col-span-2 row-span-2 bg-gray-50 rounded-3xl p-8 border border-gray-100 hover:shadow-lg transition-shadow relative overflow-hidden group">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-100 rounded-full blur-3xl -mr-32 -mt-32 opacity-50 group-hover:opacity-75 transition-opacity"></div>
+              <div className="relative z-10">
+                <div className="h-12 w-12 bg-white rounded-xl shadow-sm flex items-center justify-center text-2xl mb-6">🚀</div>
+                <h3 className="text-2xl font-bold text-gray-900 mb-4">Instant PDF Analysis</h3>
+                <p className="text-gray-600 mb-8 max-w-md">Upload any PDF contract and get an instant breakdown. We support scanned documents, multi-page agreements, and complex layouts.</p>
+                <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm max-w-sm">
+                  <div className="flex items-center gap-3">
+                    <div className="bg-red-100 p-2 rounded-lg">
+                      <svg className="w-6 h-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                    </div>
+                    <div>
+                      <div className="font-medium text-gray-900">Service_Agreement_v2.pdf</div>
+                      <div className="text-xs text-green-600 flex items-center gap-1">
+                        <span className="w-2 h-2 rounded-full bg-green-500"></span>
+                        Analysis Complete
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Feature 2 */}
+            <div className="bg-white rounded-3xl p-8 border border-gray-200 hover:shadow-lg transition-shadow">
+              <div className="h-12 w-12 bg-indigo-50 rounded-xl flex items-center justify-center text-indigo-600 text-2xl mb-4">🔍</div>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">Red Flag Detection</h3>
+              <p className="text-gray-500 text-sm">We spot risky clauses that could cost you money or rights.</p>
+            </div>
+
+            {/* Feature 3 */}
+            <div className="bg-white rounded-3xl p-8 border border-gray-200 hover:shadow-lg transition-shadow">
+              <div className="h-12 w-12 bg-purple-50 rounded-xl flex items-center justify-center text-purple-600 text-2xl mb-4">📅</div>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">Key Dates & Deadlines</h3>
+              <p className="text-gray-500 text-sm">Never miss a renewal date or payment deadline again.</p>
+            </div>
+
+            {/* Feature 4 */}
+            <div className="md:col-span-3 bg-gradient-to-r from-gray-900 to-gray-800 rounded-3xl p-8 text-white relative overflow-hidden">
+              <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
+                <div>
+                  <h3 className="text-2xl font-bold mb-2">Secure & Private by Default</h3>
+                  <p className="text-gray-300 max-w-lg">Your contracts are encrypted and processed securely. We never share your data.</p>
+                </div>
+                <div className="flex gap-4">
+                  <div className="flex items-center gap-2 bg-white/10 px-4 py-2 rounded-lg backdrop-blur-sm">
+                    <svg className="w-5 h-5 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
+                    <span className="font-medium">Bank-grade Encryption</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Trust/Footer */}
+      <footer className="py-12 border-t border-gray-200 bg-gray-50">
+        <div className="max-w-6xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white font-bold">A</div>
+            <span className="font-bold text-gray-900">AgreeSmart AI</span>
+          </div>
+          <div className="text-sm text-gray-500">
+            © {new Date().getFullYear()} AgreeSmart AI. Built for safety.
+          </div>
+          <div className="flex gap-6">
+            <Link href="/auth/login" className="text-gray-600 hover:text-indigo-600 font-medium">Log In</Link>
+            <Link href="/auth/signup" className="text-gray-600 hover:text-indigo-600 font-medium">Sign Up</Link>
           </div>
         </div>
       </footer>
