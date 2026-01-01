@@ -48,11 +48,11 @@ export async function POST(request: NextRequest) {
                 const arrayBuffer = await pdfFile.arrayBuffer();
                 const buffer = Buffer.from(arrayBuffer);
 
-                // Use require for pdf-parse (CommonJS module)
+                // Use local vendored pdf-parse to avoid ENOENT error with debug mode in node_modules version
                 // eslint-disable-next-line @typescript-eslint/no-require-imports
-                // Use require for pdf-parse (CommonJS module)
-                // eslint-disable-next-line @typescript-eslint/no-require-imports
-                let pdfParseLib = require('pdf-parse');
+                let pdfParseLib = require('../../../lib/vendor/pdf-parse/pdf-parse.js');
+                console.log('DEBUG: CWD:', process.cwd());
+                console.log('DEBUG: pdfParseLib loaded from vendor');
 
                 // Handle various export patterns (default, or direct function)
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -85,9 +85,13 @@ export async function POST(request: NextRequest) {
             } catch (err) {
                 console.error('PDF extraction error:', err);
                 const errorMsg = err instanceof Error ? err.message : 'Unknown error';
+                const fs = require('fs');
+                const testFilePath = './test/data/05-versions-space.pdf';
+                const fileExists = fs.existsSync(testFilePath);
+
                 return NextResponse.json(
                     {
-                        error: `Failed to extract text from PDF: ${errorMsg}. Please paste text instead.`,
+                        error: `DEBUG: Failed to extract text from PDF. Error: ${errorMsg}. CWD: ${process.cwd()}. TestFileExists: ${fileExists}. Please paste text instead.`,
                     },
                     { status: 400 }
                 );
